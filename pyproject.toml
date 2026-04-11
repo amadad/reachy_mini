@@ -85,6 +85,7 @@ dev = [
 ]
 
 [project.scripts]
+reachy = "reachy_mini.cli:main"
 reachy-mini-daemon = "reachy_mini.daemon.app.main:main"
 reachy-mini-app-assistant = "reachy_mini.apps.app:main"
 reachy-mini-reflash-motors = "reachy_mini.tools.reflash_motors:main"

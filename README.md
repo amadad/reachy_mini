@@ -56,6 +56,45 @@ Using an AI coding agent (Claude Code, Codex, Copilot, etc.)? You can start buil
 
 This [**AGENTS.md**](AGENTS.md) guide gives AI agents everything they need: SDK patterns, best practices, example apps, and step-by-step skills.
 
+### Agent-friendly CLI
+
+Install the root CLI so it works from any folder:
+
+```bash
+uv tool install -e .
+# or: pipx install .
+```
+
+Verify the installed command from another folder:
+
+```bash
+command -v reachy
+reachy --help
+python scripts/verify_agent_cli.py
+```
+
+Key commands:
+
+```bash
+reachy devices --json
+reachy doctor --json
+reachy daemon status --json
+reachy state --json
+reachy capture diagnostics --output ./reachy-diagnostics.json --json
+reachy capture frame --output ./reachy-frame.ppm --json
+reachy capture audio --output ./reachy-audio.wav --json
+reachy capture logs --output ./reachy-logs.txt --json
+reachy motion preview --head-pitch 15 --body-yaw 30 --json
+reachy app create my_app .
+reachy app publish ./my_app "Initial publish" --live
+```
+
+Rules:
+- prefer read-only inspection commands first
+- write artifacts to files and return the path
+- live actions like daemon restart or app publish require explicit `--live`
+- use `reachy devices` / `reachy doctor` before assuming a host
+
 ### Quick Look
 After [installing the SDK](https://huggingface.co/docs/reachy_mini/SDK/installation), once your robot is awake, you can control it in just **a few lines of code**:
 

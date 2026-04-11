@@ -28,6 +28,21 @@ Unless the user explicitly requests otherwise:
 - Guide non-technical users through each step
 - Don't assume prior knowledge
 
+### Prefer the root `reachy` CLI for agent workflows
+
+Use the installed root CLI when possible:
+
+```bash
+reachy devices --json
+reachy doctor --json
+reachy daemon status --json
+reachy state --json
+reachy capture diagnostics --output ./reachy-diagnostics.json --json
+reachy motion preview --head-pitch 15 --body-yaw 30 --json
+```
+
+Live actions require explicit `--live`, especially daemon restart and app publish.
+
 ### Always Create Python Apps
 
 When creating apps:
@@ -37,10 +52,12 @@ When creating apps:
 - **Web UIs go in `static/`** - Python apps can have web frontends
 
 ```bash
-# Default template (minimal app - good for most cases):
-reachy-mini-app-assistant create <app_name> <path> --publish
+# Root CLI wrappers (preferred for agents):
+reachy app create <app_name> <path>
+reachy app publish <path/to/app> "Initial publish" --live
 
-# Conversation template (for LLM integration, speech, making robot talk):
+# Underlying assistant binaries still work too:
+reachy-mini-app-assistant create <app_name> <path> --publish
 reachy-mini-app-assistant create --template conversation <app_name> <path> --publish
 ```
 
