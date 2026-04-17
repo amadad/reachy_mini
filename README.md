@@ -95,6 +95,23 @@ Rules:
 - live actions like daemon restart or app publish require explicit `--live`
 - use `reachy devices` / `reachy doctor` before assuming a host
 
+### Optional local voice tools
+
+For laptop-local speech experiments, install the optional `voice` dependency group:
+
+```bash
+uv sync --group voice
+uv run reachy-mini-local-voice-selfcheck --record-seconds 3
+uv run reachy-mini-local-conversation
+```
+
+If a Reachy Mini Lite microphone comes back as silence / all-zero samples after USB reconnect or sleep/wake, reboot the XMOS audio chip before starting the daemon:
+
+```bash
+uv run reachy-mini-reset-audio
+uv run reachy-mini-reset-audio --start-daemon -- --no-goto-sleep-on-stop
+```
+
 ### Quick Look
 After [installing the SDK](https://huggingface.co/docs/reachy_mini/SDK/installation), once your robot is awake, you can control it in just **a few lines of code**:
 

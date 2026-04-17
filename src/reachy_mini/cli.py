@@ -27,6 +27,22 @@ DEFAULT_PORT_ENV = "REACHY_PORT"
 DEFAULT_HOST = "localhost"
 DEFAULT_PORT = 8000
 
+TOP_LEVEL_DESCRIPTION = """Agent-friendly Reachy Mini CLI.
+
+Use when you need to discover a Reachy Mini, inspect daemon or robot state,
+capture diagnostics or media artifacts, preview motion plans, or manage apps
+with explicit `--live` approval for risky actions.
+"""
+
+TOP_LEVEL_EPILOG = """Examples:
+  reachy devices --json
+  reachy doctor --json
+  reachy daemon status --json
+  reachy capture diagnostics --output ./reachy-diagnostics.json --json
+  reachy motion preview --head-pitch 15 --body-yaw 30 --json
+  reachy app publish ./my_app \"Initial publish\" --live
+"""
+
 
 def build_response(
     command: str,
@@ -528,7 +544,9 @@ def add_connection_args(parser: argparse.ArgumentParser, *, allow_json: bool = T
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="reachy",
-        description="Agent-friendly Reachy Mini CLI",
+        description=TOP_LEVEL_DESCRIPTION,
+        epilog=TOP_LEVEL_EPILOG,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("--version", "-V", action="version", version=f"%(prog)s {__version__}")
     subparsers = parser.add_subparsers(dest="command", required=True)

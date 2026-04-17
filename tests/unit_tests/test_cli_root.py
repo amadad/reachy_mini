@@ -4,7 +4,7 @@ from contextlib import redirect_stderr, redirect_stdout
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
-from reachy_mini.cli import main
+from reachy_mini.cli import build_parser, main
 
 
 class StubRobot:
@@ -23,6 +23,15 @@ def run_cli(args: list[str]) -> tuple[int, str, str]:
     with redirect_stdout(stdout), redirect_stderr(stderr):
         code = main(args)
     return code, stdout.getvalue(), stderr.getvalue()
+
+
+
+def test_top_level_help_includes_agent_examples():
+    help_text = build_parser().format_help()
+
+    assert "Use when you need to discover a Reachy Mini" in help_text
+    assert "reachy devices --json" in help_text
+    assert "reachy app publish ./my_app \"Initial publish\" --live" in help_text
 
 
 

@@ -20,4 +20,5 @@ Building a dashboard or a non-Python controller? The Daemon exposes full control
 ## AI Experimentation Tips
 
 * **Conversation Demo:** Check out our reference implementation combining VAD (Voice Activity Detection), LLMs, and TTS: [reachy_mini_conversation_demo](https://github.com/pollen-robotics/reachy_mini_conversation_demo).
+* **Local/offline voice loop:** This repo also ships optional laptop-local voice tools. Install them with `uv sync --group voice`, then run `uv run reachy-mini-local-voice-selfcheck --record-seconds 3` to validate the stack or `uv run reachy-mini-local-conversation` for an offline wake-word → STT → LLM → TTS loop.
 * **Custom vision/audio pipelines:** If your AI pipeline needs direct camera or microphone access (e.g. a custom OpenCV detector, Whisper with sounddevice), you can deactivate the built-in media manager with `media_backend="no_media"`. See [Disabling Media](media-architecture.md#disabling-media--direct-hardware-access) for details.

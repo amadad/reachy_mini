@@ -20,6 +20,10 @@ source .venv/bin/activate && reachy-mini-daemon
 
 ## Gotchas
 
-- `sounddevice` and `soundfile` are not in `pyproject.toml` but are imported by SDK — install manually after `uv sync`
-- Default audio input is MacBook mic (device 2), not Reachy (device 0) — set explicitly in scripts
-- The `libgstpython.dylib` warning about `/Library/Frameworks/Python.framework` is cosmetic — GStreamer works fine
+- Local voice deps are pinned in the `voice` dependency group. Install them with `uv sync --group voice`.
+- `uv sync` without `--group voice` will remove the local wake-word/STT/TTS stack from `.venv`.
+- Use `uv run reachy-mini-local-voice-selfcheck` to validate KittenTTS, faster-whisper, openWakeWord, and optional mic capture.
+- If a Lite microphone comes back with all-zero samples after USB reconnect or macOS sleep/wake, run `uv run reachy-mini-reset-audio` before restarting the daemon.
+- Firmware 2.1.3 is required for beta microphone input / DoA fixes, but some macOS hosts can still return all-zero samples after the update.
+- Default audio input is MacBook mic (device 2), not Reachy (device 0) — set explicitly in scripts.
+- The `libgstpython.dylib` warning about `/Library/Frameworks/Python.framework` is cosmetic — GStreamer works fine.

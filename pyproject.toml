@@ -83,12 +83,23 @@ dev = [
     "types-toml",
     "types-PyYAML",
 ]
+voice = [
+    "sounddevice==0.5.5",
+    "soundfile==0.13.1",
+    "onnxruntime==1.22.1",
+    "faster-whisper==1.2.1",
+    "openwakeword==0.6.0",
+    "kittentts @ git+https://github.com/kittenml/kittentts.git@395171a68d5c73a50027436988fb856c30c748b8",
+]
 
 [project.scripts]
 reachy = "reachy_mini.cli:main"
 reachy-mini-daemon = "reachy_mini.daemon.app.main:main"
 reachy-mini-app-assistant = "reachy_mini.apps.app:main"
 reachy-mini-reflash-motors = "reachy_mini.tools.reflash_motors:main"
+reachy-mini-reset-audio = "reachy_mini.tools.reset_audio:main"
+reachy-mini-local-voice-selfcheck = "reachy_mini.tools.local_voice_selfcheck:main"
+reachy-mini-local-conversation = "reachy_mini.tools.local_conversation:main"
 
 [tool.uv]
 dependency-metadata = [

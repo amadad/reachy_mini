@@ -66,6 +66,13 @@ You may have plugged the microphone cable upside down.
 
 If your cable is plugged properly and you still have issues, it is likely that the FPC cable of the microphone is damaged. Please refer to the tutorial [How to change the FPC cable of the microphone of Reachy Mini?](./troubleshooting/change_mic_fpc_cable.md) to fix this issue.
 
+On Reachy Mini Lite, a software issue can also leave the microphone stuck returning silence / all-zero samples after USB reconnect or sleep/wake. In that case:
+- Update the audio firmware to 2.1.3 with the [update script](https://github.com/pollen-robotics/reachy_mini/tree/main/src/reachy_mini/assets/firmware/update.sh).
+- Reboot the XMOS audio chip with `uv run reachy-mini-reset-audio`.
+- Optionally validate the local voice stack with `uv run reachy-mini-local-voice-selfcheck --record-seconds 3`.
+
+If the microphone still records zeros after the firmware update and XMOS reset, gather diagnostics and open an issue — this still reproduces on some hosts, especially on macOS.
+
 </details>
 
 
@@ -780,8 +787,10 @@ This appears if you connect to the robot but don't consume the video frames, cau
 <summary><strong>No Microphone Input / Direction of Arrival (Beta Units)</strong></summary>
 
 * **No Input:** Requires firmware 2.1.3. Run the [update script](https://github.com/pollen-robotics/reachy_mini/tree/main/src/reachy_mini/assets/firmware/update.sh).
+* **Lite silence after reconnect / sleep-wake:** If the microphone still returns silence or all-zero samples on Reachy Mini Lite, reboot the XMOS audio chip with `uv run reachy-mini-reset-audio` before starting the daemon.
 * **No Direction:** Requires firmware 2.1.0+.
 * Check that the flat flexible cable is intalled the right way (Slides 45-47 of assembly guide).
+* If audio still returns zeros after firmware 2.1.3 + XMOS reset, capture diagnostics and report it — this is still a known issue on some hosts, especially macOS.
 
 </details>
 
