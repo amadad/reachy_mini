@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ruff: noqa: D103
 """Smoke-test the installed Reachy root CLI from outside the source tree."""
 
 from __future__ import annotations
@@ -8,7 +9,6 @@ import shutil
 import subprocess
 import tempfile
 from pathlib import Path
-
 
 
 def run(command: list[str], *, cwd: Path) -> subprocess.CompletedProcess[str]:

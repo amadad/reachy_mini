@@ -1,3 +1,4 @@
+# ruff: noqa: D103
 """Reset the Reachy Mini audio XMOS chip and optionally start the daemon.
 
 This is useful when the Reachy Mini Lite microphone returns all-zero audio

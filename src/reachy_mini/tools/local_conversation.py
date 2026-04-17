@@ -1,3 +1,4 @@
+# ruff: noqa: D101,D102,D103,D107,D401
 """Local voice conversation loop for Reachy Mini.
 
 Fully offline pipeline:
@@ -31,6 +32,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+import numpy.typing as npt
 
 WAKEWORD = "hey_jarvis"
 WAKEWORD_CACHE = Path.home() / ".cache" / "reachy_mini" / "openwakeword"
@@ -111,17 +113,17 @@ def _llm_chat(messages: list[dict[str, str]], llm_url: str) -> str:
     )
     with urllib.request.urlopen(req, timeout=60) as resp:
         data = json.loads(resp.read())
-    return data["choices"][0]["message"]["content"].strip()
+    return str(data["choices"][0]["message"]["content"]).strip()
 
 
-def _resample(audio: np.ndarray, from_sr: int, to_sr: int) -> np.ndarray:
-    """Simple linear resampling (no external dependency)."""
+def _resample(audio: npt.NDArray[np.float32], from_sr: int, to_sr: int) -> npt.NDArray[np.float32]:
+    """Resample audio with simple linear interpolation."""
     if from_sr == to_sr:
         return audio
     ratio = to_sr / from_sr
     new_len = int(len(audio) * ratio)
     indices = np.linspace(0, len(audio) - 1, new_len)
-    return np.interp(indices, np.arange(len(audio)), audio).astype(np.float32)
+    return np.asarray(np.interp(indices, np.arange(len(audio)), audio), dtype=np.float32)
 
 
 class Conversation:
@@ -134,7 +136,7 @@ class Conversation:
         self.conversation_history: list[dict[str, str]] = [
             {"role": "system", "content": SYSTEM_PROMPT},
         ]
-        self.mini = None
+        self.mini: Any | None = None
 
         # Resolve audio devices
         self.input_device = _resolve_device(self.sd, args.input_device, want_input=True)
@@ -177,22 +179,25 @@ class Conversation:
 
     def _gesture_async(self, gesture: str) -> None:
         """Fire-and-forget gesture on the robot."""
-        if self.mini is None:
+        mini = self.mini
+        if mini is None:
             return
+
         def _do() -> None:
             try:
                 if gesture == "listening":
-                    self.mini.goto_target(antennas=[0.3, 0.3], duration=0.3)
+                    mini.goto_target(antennas=[0.3, 0.3], duration=0.3)
                 elif gesture == "thinking":
-                    self.mini.goto_target(antennas=[0.15, -0.15], duration=0.4)
+                    mini.goto_target(antennas=[0.15, -0.15], duration=0.4)
                     time.sleep(0.3)
-                    self.mini.goto_target(antennas=[-0.15, 0.15], duration=0.4)
+                    mini.goto_target(antennas=[-0.15, 0.15], duration=0.4)
                 elif gesture == "speaking":
-                    self.mini.goto_target(antennas=[0.0, 0.0], duration=0.3)
+                    mini.goto_target(antennas=[0.0, 0.0], duration=0.3)
                 elif gesture == "idle":
-                    self.mini.goto_target(antennas=[0.0, 0.0], duration=0.5)
+                    mini.goto_target(antennas=[0.0, 0.0], duration=0.5)
             except Exception:
                 pass
+
         threading.Thread(target=_do, daemon=True).start()
 
     def listen_for_wakeword(self) -> bool:
@@ -222,11 +227,11 @@ class Conversation:
                     return True
         return False
 
-    def record_utterance(self) -> np.ndarray | None:
+    def record_utterance(self) -> npt.NDArray[np.float32] | None:
         """Record until silence is detected. Returns float32 mono audio."""
         print("Listening... (speak now)")
         self._gesture_async("listening")
-        chunks: list[np.ndarray] = []
+        chunks: list[npt.NDArray[np.float32]] = []
         silence_samples = 0
         max_samples = int(MAX_RECORD_SECONDS * SAMPLE_RATE)
         total_samples = 0
@@ -241,7 +246,7 @@ class Conversation:
         ) as stream:
             while self.running and total_samples < max_samples:
                 audio, _ = stream.read(block_size)
-                mono = audio.flatten()
+                mono = np.asarray(audio.flatten(), dtype=np.float32)
                 chunks.append(mono)
                 total_samples += len(mono)
 
@@ -256,12 +261,12 @@ class Conversation:
 
         if not chunks:
             return None
-        audio = np.concatenate(chunks)
+        audio = np.asarray(np.concatenate(chunks), dtype=np.float32)
         # Trim trailing silence
         trim_samples = min(int(SILENCE_DURATION * SAMPLE_RATE), len(audio) // 2)
         return audio[:-trim_samples] if trim_samples > 0 else audio
 
-    def transcribe(self, audio: np.ndarray) -> str:
+    def transcribe(self, audio: npt.NDArray[np.float32]) -> str:
         """Transcribe audio to text."""
         tmp = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
         try:
@@ -347,9 +352,10 @@ class Conversation:
 
     def shutdown(self) -> None:
         self.running = False
-        if self.mini is not None:
+        mini = self.mini
+        if mini is not None:
             try:
-                self.mini.__exit__(None, None, None)
+                mini.__exit__(None, None, None)
             except Exception:
                 pass
 

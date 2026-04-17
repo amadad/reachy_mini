@@ -199,7 +199,7 @@ def calibrate_camera(
         all_img_points.append(corners)
 
     # cv2.calibrateCamera returns (rms_error, camera_matrix, dist_coeffs, rvecs, tvecs)
-    calib_result = cv2.calibrateCamera(  # type: ignore[call-overload]
+    calib_result = cv2.calibrateCamera(
         objectPoints=all_obj_points,
         imagePoints=all_img_points,
         imageSize=image_size,

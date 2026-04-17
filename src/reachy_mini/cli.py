@@ -1,3 +1,4 @@
+# ruff: noqa: D103
 """Agent-friendly Reachy Mini root CLI."""
 
 from __future__ import annotations
@@ -13,7 +14,7 @@ import wave
 from contextlib import suppress
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import requests
 from rich.console import Console
@@ -78,7 +79,8 @@ def print_json_response(
 
 
 def resolve_host(value: str | None) -> str:
-    return value or os.getenv(DEFAULT_HOST_ENV, DEFAULT_HOST)
+    env_value = os.getenv(DEFAULT_HOST_ENV)
+    return value or env_value or DEFAULT_HOST
 
 
 
@@ -141,7 +143,7 @@ def emit(command: str, args: argparse.Namespace, data: dict[str, Any]) -> None:
 
 
 
-def robot_to_dict(robot) -> dict[str, Any]:
+def robot_to_dict(robot: Any) -> dict[str, Any]:
     return {
         "name": robot.name,
         "host": robot.host,
@@ -340,7 +342,7 @@ def run_motion_preview(args: argparse.Namespace) -> int:
 
 
 
-def _sdk_connection_mode(host: str) -> str:
+def _sdk_connection_mode(host: str) -> Literal["localhost_only", "network"]:
     return "localhost_only" if host in {"localhost", "127.0.0.1"} else "network"
 
 

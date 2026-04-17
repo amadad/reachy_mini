@@ -1,3 +1,4 @@
+# ruff: noqa: D103
 """Local voice stack self-check for Reachy Mini.
 
 This validates the software pieces needed for a local feedback loop:
@@ -22,6 +23,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+import numpy.typing as npt
 
 VOICE_GROUP_HINT = "Install missing voice deps with: uv sync --group voice"
 DEFAULT_TEXT = "Hello from Reachy. This is a local voice self-check."
@@ -55,7 +57,7 @@ def _normalize_text(text: str) -> str:
     return " ".join(text.lower().replace("-", " ").split())
 
 
-def _rms_and_peak(audio: np.ndarray) -> tuple[float, float]:
+def _rms_and_peak(audio: npt.NDArray[np.float32]) -> tuple[float, float]:
     flat = np.asarray(audio, dtype=np.float64).reshape(-1)
     if flat.size == 0:
         return 0.0, 0.0
@@ -63,7 +65,7 @@ def _rms_and_peak(audio: np.ndarray) -> tuple[float, float]:
 
 
 def _list_devices(sd: Any) -> list[dict[str, Any]]:
-    return [dict(device) for device in sd.query_devices()]  # type: ignore[arg-type]
+    return [dict(device) for device in sd.query_devices()]
 
 
 def _print_devices(devices: list[dict[str, Any]]) -> None:
@@ -113,13 +115,13 @@ def _ensure_openwakeword_assets(download_models: Any, cache_dir: Path, wakeword:
     return required
 
 
-def _generate_tts(KittenTTS: Any, text: str, voice: str, speed: float) -> tuple[np.ndarray, int]:
+def _generate_tts(KittenTTS: Any, text: str, voice: str, speed: float) -> tuple[npt.NDArray[np.float32], int]:
     model = KittenTTS("KittenML/kitten-tts-nano-0.8", backend="cpu")
     audio = np.asarray(model.generate(text, voice=voice, speed=speed), dtype=np.float32)
     return audio, 24000
 
 
-def _play_audio(sd: Any, audio: np.ndarray, samplerate: int, device: int | None) -> None:
+def _play_audio(sd: Any, audio: npt.NDArray[np.float32], samplerate: int, device: int | None) -> None:
     if device is None:
         print("No output device selected, skipping playback.")
         return
@@ -127,7 +129,7 @@ def _play_audio(sd: Any, audio: np.ndarray, samplerate: int, device: int | None)
     sd.wait()
 
 
-def _write_wav(sf: Any, path: Path, audio: np.ndarray, samplerate: int) -> None:
+def _write_wav(sf: Any, path: Path, audio: npt.NDArray[np.float32], samplerate: int) -> None:
     sf.write(str(path), audio, samplerate)
 
 
