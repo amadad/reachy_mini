@@ -7,6 +7,8 @@ samples after USB reconnect, suspend/resume, or macOS sleep/wake.
 Typical usage:
     uv run reachy-mini-reset-audio
     uv run reachy-mini-reset-audio --start-daemon -- --no-wake-up-on-start
+
+This helper is safe to run repeatedly when audio enumeration gets stuck.
 """
 
 from __future__ import annotations
