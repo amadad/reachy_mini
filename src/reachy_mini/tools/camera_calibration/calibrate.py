@@ -14,7 +14,7 @@ Usage:
 import argparse
 import os
 from glob import glob
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple, cast
 
 import cv2
 import numpy as np
@@ -198,8 +198,10 @@ def calibrate_camera(
         all_obj_points.append(obj_pts)
         all_img_points.append(corners)
 
-    # cv2.calibrateCamera returns (rms_error, camera_matrix, dist_coeffs, rvecs, tvecs)
-    calib_result = cv2.calibrateCamera(
+    # OpenCV's stubs disagree across platforms here, so cast the callable once
+    # instead of relying on a platform-specific ignore comment.
+    calibrate_camera_fn = cast(Any, cv2.calibrateCamera)
+    calib_result = calibrate_camera_fn(
         objectPoints=all_obj_points,
         imagePoints=all_img_points,
         imageSize=image_size,
