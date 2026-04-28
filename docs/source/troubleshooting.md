@@ -281,6 +281,8 @@ Yes. The daemon provides a REST API (FastAPI) and WebSocket support.
 * **Docs:** `http://localhost:8000/docs` (available when daemon is running).
 * **Features:** Get state, Move joints, Control daemon.
 
+On Reachy Mini Lite, the daemon is localhost-only by default. Use `--no-localhost-only` only when you intentionally want another device on a trusted network to reach your laptop; the API includes motion, daemon, app, and update controls.
+
 You can use the API to control the robot and get its state and even control the daemon itself. The API is implemented using [FastAPI](https://fastapi.tiangolo.com/) and [pydantic](https://docs.pydantic.dev/latest/) models.
 
 It should provide you all the necessary endpoints to interact with the robot, including:

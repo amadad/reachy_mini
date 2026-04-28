@@ -51,6 +51,13 @@ When creating apps:
 - **If the command fails** - ask the user to run it in their terminal; don't attempt complex workarounds
 - **Web UIs go in `static/`** - Python apps can have web frontends
 
+### Local media / voice gotchas
+
+- On macOS, camera and microphone permission prompts must come from a **GUI-local app context** (for example Terminal.app launched locally), not an SSH/tmux process tree.
+- If a Reachy Mini Lite microphone comes back with silence / all-zero samples after USB reconnect or sleep/wake, try `reachy-mini-reset-audio` before restarting the daemon.
+- For direct hardware access with OpenCV or `sounddevice`, use `ReachyMini(media_backend="no_media")` so the daemon releases camera/audio devices cleanly.
+- Local/offline voice tools are optional. Install them with `uv sync --group voice`, then use `reachy-mini-local-voice-selfcheck` or `reachy-mini-local-conversation` as needed.
+
 ```bash
 # Root CLI wrappers (preferred for agents):
 reachy app create <app_name> <path>
@@ -63,14 +70,16 @@ reachy-mini-app-assistant create --template conversation <app_name> <path> --pub
 
 See `skills/create-app.md` for details. JS-only apps are not yet supported for discovery/sharing.
 
-### Always Create plan.md Before Coding
+### Create `plan.md` for non-trivial app work
 
-Before implementing any app:
+Before implementing a new app or a non-trivial feature:
 1. Create `plan.md` in the app directory
 2. Write your understanding of what the user wants
 3. List your technical approach
 4. Ask clarifying questions and provide answer fields inside `plan.md`
 5. Wait for answers before coding
+
+Skip `plan.md` for tiny, obvious fixes (for example small doc edits, one-file bug fixes, or mechanical refactors) unless the user explicitly asks for a plan.
 
 ### Keep Notes in agents.local.md
 
@@ -132,8 +141,10 @@ See and run `examples/minimal_demo.py` - demonstrates connection, head motion, a
 
 The daemon exposes an HTTP/WebSocket API at `http://{daemon-ip}:8000/api`.
 
-- **Lite**: `localhost:8000` (daemon runs on your machine)
+- **Lite**: `localhost:8000` (daemon runs on your machine and is localhost-only by default)
 - **Wireless**: `reachy-mini.local:8000` or the robot's IP address
+
+For Lite, do not expose the daemon with `--no-localhost-only` unless the user explicitly asks and the network is trusted; the API includes motion, daemon, app, and update controls.
 
 **Use REST API for:** Web UIs, non-Python clients, remote control, AI/LLM integration via HTTP. => Note: for the app to be discoverable, it must be a python app for now, this will change in a future release.
 

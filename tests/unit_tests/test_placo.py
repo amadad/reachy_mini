@@ -3,8 +3,17 @@ import platform
 import pytest
 
 
+def _placo_available() -> bool:
+    try:
+        import placo  # noqa: F401
+    except ImportError:
+        return False
+    return True
+
+
 @pytest.mark.skipif(
-    platform.system() == "Windows", reason="Placo is not available on Windows"
+    platform.system() == "Windows" or not _placo_available(),
+    reason="Placo is not available in this environment",
 )
 def test_load_kinematics():  # noqa: D100, D103
     from reachy_mini.utils.constants import URDF_ROOT_PATH

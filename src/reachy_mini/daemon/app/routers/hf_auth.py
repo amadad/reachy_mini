@@ -1,5 +1,6 @@
 """HuggingFace authentication API routes."""
 
+import html
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Request
@@ -216,6 +217,7 @@ def _oauth_result_page(success: bool, message: str) -> str:
     icon = "✅" if success else "❌"
     title = "Login Successful" if success else "Login Failed"
     color = "#10b981" if success else "#ef4444"
+    escaped_message = html.escape(message, quote=True)
 
     return f"""<!DOCTYPE html>
 <html>
@@ -265,7 +267,7 @@ def _oauth_result_page(success: bool, message: str) -> str:
     <div class="container">
         <div class="icon">{icon}</div>
         <h1>{title}</h1>
-        <p>{message}</p>
+        <p>{escaped_message}</p>
         <div class="hint">
             You can close this window and return to your robot's dashboard.
         </div>

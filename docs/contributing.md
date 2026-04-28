@@ -40,15 +40,16 @@ uv sync --all-extras --group dev
 
 ## Code testing
 
-The code is tested with pytest. You can run the tests with the following command:
+The code is tested with pytest. For a local no-hardware pass, run the same marker subset as CI:
 
 ```bash
-pytest
+uv run pytest -m "not audio and not video and not wireless"
 ```
 
-The [CI](../.github/workflows/pytest.yml) runs a limited number of tests due to the absence of robots. Check the available options in the pyproject.toml file to run the tests that are relevant for you.
-For instance
+Tests marked `audio`, `video`, or `wireless` require the matching hardware or network setup. Optional-backend tests such as Placo are skipped when the extra is not installed.
+
+For instance, to run audio-specific tests:
 
 ```bash
-pytest -m "audio"
+uv run pytest -m "audio"
 ```

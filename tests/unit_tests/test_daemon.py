@@ -18,7 +18,7 @@ async def _start_app_server(
     Returns (daemon, server, thread, port).
     """
     args = Args(
-        sim=True,
+        mockup_sim=True,
         headless=True,
         wake_up_on_start=False,
         no_media=True,
@@ -78,7 +78,8 @@ async def test_daemon_client_disconnection() -> None:
         with ReachyMini(host="localhost", port=port, media_backend="no_media") as mini:
             status = mini.client.get_status()
             assert status.state == "running"
-            assert status.simulation_enabled
+            assert not status.simulation_enabled
+            assert status.mockup_sim_enabled
             assert status.error is None
             assert status.backend_status is not None
             assert status.backend_status.motor_control_mode == "enabled"

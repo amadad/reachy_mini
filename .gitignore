@@ -260,6 +260,14 @@ src/reachy_mini_dashboard/installed_apps/*
 examples/debug/measures/*
 .DS_Store
 
+# Local Reachy CLI diagnostics/media captures
+/reachy-diagnostics*.json
+/reachy-frame*.ppm
+/reachy-audio*.wav
+/reachy-logs*.txt
+/camera-test.ppm
+/audio-verify.wav
+
 src/reachy_mini/tools/camera_calibration/images/*
 src/reachy_mini/tools/camera_calibration/images_for_crop_analysis/*
 src/reachy_mini/tools/camera_calibration/images_for_crop_analysis_lite/*

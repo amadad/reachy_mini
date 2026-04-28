@@ -13,6 +13,7 @@ import logging
 import types
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
+from ipaddress import ip_address
 from pathlib import Path
 from typing import Any, AsyncGenerator
 
@@ -22,6 +23,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.types import ASGIApp, Receive, Scope, Send
 
 from reachy_mini.apps.manager import AppManager
 from reachy_mini.daemon.app.routers import (
@@ -94,6 +96,53 @@ class Args:
     localhost_only: bool | None = None
 
 
+_LOCAL_ORIGIN_REGEX = r"https?://(localhost|127\.0\.0\.1|\[::1\])(:\d+)?"
+
+
+def _is_loopback_client(host: str | None) -> bool:
+    if host is None:
+        return False
+    try:
+        return ip_address(host).is_loopback
+    except ValueError:
+        return host == "localhost"
+
+
+class LocalhostOnlyMiddleware:
+    """Reject HTTP and WebSocket requests from non-loopback clients."""
+
+    def __init__(self, app: ASGIApp, *, enabled: bool) -> None:
+        """Initialize the middleware."""
+        self.app = app
+        self.enabled = enabled
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        """Handle one ASGI request."""
+        if not self.enabled or scope["type"] not in {"http", "websocket"}:
+            await self.app(scope, receive, send)
+            return
+
+        client = scope.get("client")
+        host = client[0] if client else None
+        if _is_loopback_client(host):
+            await self.app(scope, receive, send)
+            return
+
+        if scope["type"] == "websocket":
+            await send({"type": "websocket.close", "code": 1008})
+            return
+
+        body = b"Forbidden: Reachy Mini daemon is in localhost-only mode."
+        await send(
+            {
+                "type": "http.response.start",
+                "status": 403,
+                "headers": [(b"content-type", b"text/plain; charset=utf-8")],
+            }
+        )
+        await send({"type": "http.response.body", "body": body})
+
+
 def create_app(args: Args, health_check_event: asyncio.Event | None = None) -> FastAPI:
     """Create and configure the FastAPI application."""
     localhost_only = (
@@ -101,6 +150,7 @@ def create_app(args: Args, health_check_event: asyncio.Event | None = None) -> F
         if args.localhost_only is not None
         else (False if args.wireless_version else True)
     )
+    args.localhost_only = localhost_only
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
@@ -245,12 +295,22 @@ def create_app(args: Args, health_check_event: asyncio.Event | None = None) -> F
             health_check_event.set()
             return {"status": "ok"}
 
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],  # or restrict to your HF domain
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+    if localhost_only:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=[],
+            allow_origin_regex=_LOCAL_ORIGIN_REGEX,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+    else:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+    app.add_middleware(LocalhostOnlyMiddleware, enabled=localhost_only)
 
     STATIC_DIR = Path(__file__).parent / "dashboard" / "static"
     TEMPLATES_DIR = Path(__file__).parent / "dashboard" / "templates"

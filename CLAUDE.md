@@ -27,3 +27,5 @@ source .venv/bin/activate && reachy-mini-daemon
 - Firmware 2.1.3 is required for beta microphone input / DoA fixes, but some macOS hosts can still return all-zero samples after the update.
 - Default audio input is MacBook mic (device 2), not Reachy (device 0) — set explicitly in scripts.
 - The `libgstpython.dylib` warning about `/Library/Frameworks/Python.framework` is cosmetic — GStreamer works fine.
+- Local no-hardware test pass: `uv run pytest tests/unit_tests -q -m 'not audio and not video and not wireless' --tb=short`.
+- Lite daemon API is localhost-only by default; only use `--no-localhost-only` on a trusted network and with explicit intent.

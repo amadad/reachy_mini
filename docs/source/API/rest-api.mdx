@@ -2,8 +2,10 @@
 
 The Reachy Mini daemon exposes an HTTP and WebSocket API at `http://<daemon-ip>:8000/api`.
 
-- **Lite** — the daemon runs on your machine: `http://localhost:8000`
+- **Lite** — the daemon runs on your machine and is localhost-only by default: `http://localhost:8000`
 - **Wireless** — the daemon runs on the robot: `http://reachy-mini.local:8000`
+
+For Lite, keep the default localhost-only mode unless you explicitly need another device to reach your laptop. If you do expose it with `--no-localhost-only`, only do so on a trusted network: the API includes motion, daemon, app, and update controls.
 
 When the daemon is running you can browse the interactive **Swagger UI** at
 
